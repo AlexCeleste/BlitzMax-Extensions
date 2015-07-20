@@ -7,7 +7,7 @@
 *.b.s
 a.out
 tmp/*
-.bmx/*
+*/.bmx/*
 *.debug
 .DS_Store
 Thumbs.db

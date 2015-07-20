@@ -67,7 +67,7 @@ Next
 Type IVector Extends TInterface
 	Method Length:Float() Abstract
 	
-	Function Make:IVector(o:Object)
+	Function Cast:IVector(o:Object)
 		Return IVector(TInterface.Interface(o, "IVector"))
 	End Function
 End Type
