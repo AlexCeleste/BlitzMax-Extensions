@@ -1,0 +1,13 @@
+*.exe
+*.app
+*.a
+*.o
+*.dll
+*.zip
+*.b.s
+a.out
+tmp/*
+.bmx/*
+*.debug
+.DS_Store
+Thumbs.db

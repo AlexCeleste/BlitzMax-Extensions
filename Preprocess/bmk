@@ -1,0 +1,17 @@
+#!/bin/bash
+FILE="${!#}"
+
+awk -F'"' -v OFS='"' '{ for (i=1; i<=NF; i+=2) gsub("'"'"'", "//", $i) } { gsub("\r", "", $0) } 1' "$FILE" > "$FILE".tmp.c
+awk -v OFS="" '/^[ \t]*#/ {
+	l = length($0);
+	m = match($0, /^[ \t]*#[ \t]*([Ii]f|[If]f[Dd]ef|[Ee]lse|[Ee]lif|[Ee]nd[Ii]f)/);
+	print tolower(substr($0, m, RLENGTH)), substr($0, RLENGTH + 1, l - RLENGTH); next
+} 1' "$FILE".tmp.c > "$FILE".tmp2.c
+
+gcc -std=c99 -E "$FILE".tmp2.c > "$FILE".tmp.bmx
+sed -i '' -e '/^#/ d' "$FILE".tmp.bmx
+
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+"$DIR"/bmk_real "$@".tmp.bmx
+
+rm "$FILE".tmp.bmx "$FILE".tmp.c "$FILE".tmp2.c
