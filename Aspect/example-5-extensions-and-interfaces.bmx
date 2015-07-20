@@ -12,7 +12,7 @@ SuperStrict
 ' we can't use the dot-syntax, and that barely makes them worth the effort.
 ' Luckily, there's a second category of language feature that cuts horizontally "across"
 ' the class tree, and that's the "interface" extension! Interfaces allow completely
-' unrelated types that rpesent the same methods to be used in the same way; extension
+' unrelated types that present the same methods to be used in the same way; extension
 ' methods allow you to add more methods to a class. So we can use interfaces to get a
 ' convenient syntax for using extension methods.
 
@@ -76,11 +76,11 @@ End Type
 Local ivecs:IVector[4]
 Print "~nDirect (loop):"
 For Local i:Int = 0 Until 4
-	ivecs[i] = IVector.Make(vecs[i])
+	ivecs[i] = IVector.Cast(vecs[i])
 	Print "  length: " + ivecs[i].Length()
 Next
 
-Local iv1:Ivector = ivecs[0], iv2:Ivector = ivecs[1], iv3:Ivector = ivecs[2], iv4:Ivector = ivecs[3]
+Local iv1:IVector = ivecs[0], iv2:IVector = ivecs[1], iv3:IVector = ivecs[2], iv4:IVector = ivecs[3]
 Print "~nDirect (variable access):"
 Print "  v1 length: " + iv1.Length()
 Print "  v2 length: " + iv2.Length()
