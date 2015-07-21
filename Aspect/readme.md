@@ -34,5 +34,9 @@ Method extension and replacement is implemented by dynamic class generation: new
 
 Examples are included.
 
+
+Be aware that aspect-oriented programming is [patented in the US, by Xerox Corporation](http://www.google.com/patents/US6467086). This appears to be a [mostly-defensive patent](https://en.wikipedia.org/wiki/Defensive_patent_aggregation), as [AspectJ's licence](http://www.eclipse.org/legal/epl-v10.html) explicitly grants users "a non-exclusive, worldwide, royalty-free patent license" to users who do not themselves litigate against Xerox. There are [many other AOP implementations](https://en.wikipedia.org/wiki/Aspect-oriented_programming#Implementations) in the wild, as well as substantial prior art, and nobody has ever been sued over the patent. Use caution and good judgement, but I believe this is safe.
+
+
 This extension is dedicated to the public domain, by author Alex "Yasha" Gilding.
 
