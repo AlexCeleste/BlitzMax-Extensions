@@ -72,7 +72,7 @@ Type EventManager Final
 		If ct Then IDReg.all = IDReg.all[..IDReg.all.Length - ct]
 	End Method
 	
-	Method CreateEvent:TEvent(id:Int, source:Object = Null, data:Int = 0, mods:Int = 0, x:Int = 0, y:Int = 0, extra:Object = Null)
+	Method CreateEvent:TEvent(id:Int, source:Object = Null, data:Int = 0, mods:Int = 0, x:Int = 0, y:Int = 0, extra:Object = Null) NoDebug
 		Local e:ManagedEvent = New ManagedEvent
 		e.id = id ; e.source = source ; e.data = data ; e.mods = mods ; e.x = x ; e.y = y ; e.extra = extra
 		e.manager = Self
@@ -89,16 +89,16 @@ Type CoroutineQueue Final
 	
 	' push a coroutine to the queue of things to do
 	' note that this doesn't "yield" in the conventional sense of ending the caller's execution - use sensibly
-	Method Yield(c:Coroutine, args:Object[])
+	Method Yield(c:Coroutine, args:Object[]) NoDebug
 		_queue.AddLast(CoroInvocation.Make(c, args, MilliSecs() - 1))
 	End Method
-	Method YieldIn(c:Coroutine, wait:Int, args:Object[])
+	Method YieldIn(c:Coroutine, wait:Int, args:Object[]) NoDebug
 		_queue.AddLast(CoroInvocation.Make(c, args, MilliSecs() + wait))
 	End Method
 	
 	' pop coroutine invocations off the queue until the duration is exceeded or there are no more
 	' this is to support load balancing, to give the host a chance to interleave some event processing
-	Method Run(duration:Int = 10)
+	Method Run(duration:Int = 10) NoDebug
 		Local i:CoroInvocation, target:Int = MilliSecs() + duration, skip:CoroInvocation = Null
 		Repeat
 			i = CoroInvocation(_queue.RemoveFirst())
@@ -116,10 +116,16 @@ Type CoroutineQueue Final
 			EndIf
 		Until MilliSecs() > target
 	End Method
+	
+	Method Clear(c:Coroutine) NoDebug
+		For Local ci:CoroInvocation = EachIn _queue
+			If ci.coro = c Then _queue.Remove(ci)
+		Next
+	End Method
 End Type
 
 Type Coroutine Final
-	Function Make:Coroutine(o:Object, m:String)	'bind an object/method name pair into a callable object
+	Function Make:Coroutine(o:Object, m:String) NoDebug	'bind an object/method name pair into a callable object
 		Local c:Coroutine = New Self
 		c.o = o ; c.m = TTypeId.ForObject(o).FindMethod(m)
 		If c.m Then Return c Else Return Null
@@ -132,7 +138,7 @@ Private
 Type IDReg Final	'helper class for events
 	Global all:IDReg[]
 	Field id:Int, freq:Int, recv:Object[], meth:TMethod[], mngr:EventManager[]
-	Method Compare:Int(with:Object)
+	Method Compare:Int(with:Object) NoDebug
 		Local w:IDReg = IDReg(with)
 		If w = Null Then Return Super.Compare(with)
 		If freq < w.freq Then Return -1 Else If freq = w.freq Then Return 0 Else Return 1
@@ -157,7 +163,7 @@ Type IDReg Final	'helper class for events
 	End Method
 	
 	Global Hooked:Int = False	'message all objects subscribed to the emitted event ID
-	Function HookF:Object(id:Int, data:Object, context:Object)
+	Function HookF:Object(id:Int, data:Object, context:Object) NoDebug
 		Local managed:ManagedEvent = ManagedEvent(data), manager:EventManager
 		If managed Then manager = managed.manager
 		id = TEvent(data).id	'want the event id, not the passed id
@@ -165,9 +171,12 @@ Type IDReg Final	'helper class for events
 		For Local i:Int = 0 Until all.Length
 			Local reg:IDReg = all[i]
 			If reg.id = id
-				For Local r:Int = 0 Until reg.freq
-					If reg.mngr[r] = manager Or manager = Null Then reg.meth[r].Invoke(reg.recv[r], arr)
-				Next
+				Local r:Int = 0
+				While r < reg.freq  'can change mid-loop
+					Local recv:Object = reg.recv[r]
+					If reg.mngr[r] = manager Or manager = Null Then reg.meth[r].Invoke(recv, arr)
+					r :+ (recv = reg.recv[r])
+				Wend
 				Exit
 			EndIf
 		Next
@@ -181,7 +190,7 @@ End Type
 
 Type CoroInvocation Final	'helper class representing a complete coroutine invocation (+ args and returnTo)
 	Field coro:Coroutine, args:Object[], after:Int
-	Function Make:CoroInvocation(c:Coroutine, a:Object[], after:Int)
+	Function Make:CoroInvocation(c:Coroutine, a:Object[], after:Int) NoDebug
 		Local i:CoroInvocation = New Self
 		i.coro = c ; i.args = a ; i.after = after
 		Return i
